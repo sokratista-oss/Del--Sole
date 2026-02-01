@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Del'Sole | Player Cards Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8833ff;
+            --secondary: #00ffcc;
+            --bg: #0a0a0c;
+            --card-inner: #16161f;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-image: radial-gradient(circle at 50% 50%, #12002f 0%, #0a0a0c 100%);
+            min-height: 100vh;
+        }
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto 40px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid var(--primary);
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-family: 'Orbitron';
+            font-size: 12px;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+
+        .title { 
+            font-family: 'Orbitron'; 
+            text-align: center; 
+            font-size: clamp(24px, 5vw, 40px); 
+            color: #fff; 
+            text-shadow: 0 0 20px var(--primary);
+            margin: 0;
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 25px; 
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        /* KART TASARIMI */
+        .card {
+            background: var(--card-inner);
+            border: 1px solid rgba(136, 51, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { 
+            transform: scale(1.03); 
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(136, 51, 255, 0.2);
+        }
+        
+        /* Kart Üst Kısım */
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .rating-box {
+            text-align: center;
+            border-right: 1px solid #333;
+            padding-right: 15px;
+        }
+        .rating-val {
+            font-family: 'Orbitron';
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--secondary);
+            display: block;
+        }
+        .rating-label { font-size: 9px; color: #888; letter-spacing: 1px; }
+
+        .info-box { flex: 1; padding-left: 15px; }
+        .name { font-family: 'Orbitron'; font-size: 18px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pos { color: var(--primary); font-size: 11px; font-weight: 700; }
+
+        /* Ana İstatistikler */
+        .main-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: rgba(0,0,0,0.4);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .ms-item { text-align: center; }
+        .ms-val { font-family: 'Orbitron'; display: block; font-size: 16px; }
+        .ms-label { font-size: 8px; color: #666; font-weight: 700; }
+
+        /* Detaylı Liste */
+        .detail-list {
+            font-size: 12px;
+            border-top: 1px solid #222;
+            padding-top: 10px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .detail-row span:last-child { color: #ccc; font-weight: 600; }
+        .detail-row span:first-child { color: #777; }
+
+        .no-watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-family: 'Orbitron';
+            font-size: 40px;
+            color: rgba(255,255,255,0.03);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-nav">
+    <a href="main.html" class="back-btn">← DASHBOARD</a>
+    <div class="title">PLAYER CARDS</div>
+    <div style="width: 100px;"></div> </div>
+
+<div class="grid" id="cardGrid"></div>
+
+<script>
+    const JSON_URL = "https://api.npoint.io/3d476a612f6e630dfdae";
+
+    async function loadCards() {
+        try {
+            const res = await fetch(JSON_URL);
+            const players = await res.json();
+            const grid = document.getElementById("cardGrid");
+            grid.innerHTML = "";
+
+            players.forEach(p => {
+                const rating = parseInt(p.puan) || 0;
+                
+                // Rating'e göre renk belirleme (Yüksek puan daha parlak yeşil/cyan)
+                let ratingColor = "var(--secondary)";
+                if(rating > 500) ratingColor = "#00ff88"; // Süper performans
+                if(rating < 200 && rating > 0) ratingColor = "#ff4444"; // Düşük performans
+                
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="no-watermark">#${p.no}</div>
+                    <div class="card-top">
+                        <div class="rating-box">
+                            <span class="rating-val" style="color:${ratingColor}">${rating}</span>
+                            <span class="rating-label">RATING</span>
+                        </div>
+                        <div class="info-box">
+                            <div class="name">${p.n}</div>
+                            <div class="pos">${p.mevki || 'MID'} | NO: ${p.no}</div>
+                        </div>
+                    </div>
+
+                    <div class="main-stats">
+                        <div class="ms-item">
+                            <span class="ms-val" style="color:#fff">${p.gol || 0}</span>
+                            <span class="ms-label">GOL</span>
+                        </div>
+                        <div class="ms-item">
+                            <span class="ms-val" style="color:#fff">${p.asist || 0}</span>
+                            <span class="ms-label">AST</span>
+                        </div>
+                        <div class="ms-item">
+                            <span class="ms-val" style="color:var(--secondary)">${p.tackle || 0}</span>
+                            <span class="ms-label">TCK</span>
+                        </div>
+                        <div class="ms-item">
+                            <span class="ms-val" style="color:var(--primary)">${p.save || 0}</span>
+                            <span class="ms-label">SAV</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span>Shots (Target)</span> 
+                            <span style="color:${p.shots !== '0(0)' ? '#fff' : '#555'}">${p.shots || '0(0)'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Interceptions</span> 
+                            <span>${p.interception || 0}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Pass Accuracy</span> 
+                            <span style="color:${parseInt(p.pass_acc) > 80 ? 'var(--secondary)' : '#ccc'}">%${p.pass_acc || 0}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Games Played</span> 
+                            <span style="color:var(--primary)">${p.games || 0}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch(e) {
+            console.error("Veri yükleme hatası:", e);
+            document.getElementById("cardGrid").innerHTML = "<p style='text-align:center; width:100%; color:red;'>Veriler yüklenemedi. Bağlantınızı kontrol edin.</p>";
+        }
+    }
+
+    loadCards();
+</script>
+</script>
+</body>
+</html>

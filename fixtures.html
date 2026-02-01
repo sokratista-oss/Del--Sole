@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Del'Sole | Schedule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050508;
+            --card-bg: #0d0e14;
+            --accent: #00ffcc;
+            --primary: #8833ff;
+            --border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            background-image: radial-gradient(circle at 50% 100%, rgba(0, 255, 204, 0.1) 0%, transparent 50%);
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .dash-btn {
+            text-decoration: none;
+            color: var(--accent);
+            font-family: 'Orbitron';
+            font-size: 11px;
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .dash-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent); }
+
+        h1 { font-family: 'Orbitron'; font-size: 22px; letter-spacing: 5px; margin: 0; }
+
+        /* UPCOMING MATCH CARD */
+        .fixture-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .fixture-card:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            background: rgba(136, 51, 255, 0.05);
+        }
+
+        .match-info { flex: 1; }
+        .match-label { font-family: 'Orbitron'; font-size: 10px; color: var(--primary); letter-spacing: 2px; margin-bottom: 5px; }
+        .match-teams { font-family: 'Orbitron'; font-size: 18px; font-weight: 800; }
+
+        .match-time-box {
+            text-align: right;
+            border-left: 1px solid var(--border);
+            padding-left: 30px;
+        }
+
+        .match-date { font-family: 'Orbitron'; font-size: 16px; color: var(--accent); }
+        .match-hour { font-size: 24px; font-weight: 800; color: #fff; }
+
+        /* NEXT MATCH HIGHLIGHT (En Yakın Maç) */
+        .next-match {
+            border: 1px solid var(--accent);
+            background: linear-gradient(45deg, #0d0e14, #15201e);
+            padding: 40px;
+            margin-bottom: 50px;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+        }
+
+        .next-match .match-label { color: var(--accent); font-size: 12px; }
+        .next-match .match-teams { font-size: 26px; }
+
+        .vs-divider { color: #444; margin: 0 10px; font-size: 14px; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="main.html" class="dash-btn">← DASHBOARD</a>
+        <h1>FIXTURES</h1>
+        <div style="width: 50px;"></div>
+    </header>
+
+    <div id="fixtureWrapper">
+        </div>
+</div>
+
+<script>
+    // Buraya fixture için oluşturduğun npoint linkini koy
+    const FIXTURE_API = "https://api.npoint.io/2b351f5c4ff9a8807029";
+
+    async function loadFixtures() {
+        const wrapper = document.getElementById('fixtureWrapper');
+        try {
+            const res = await fetch(FIXTURE_API);
+            const data = await res.json();
+            wrapper.innerHTML = "";
+
+            data.forEach((match, index) => {
+                const isNext = index === 0; // İlk maç "Next Match" olsun
+                const team1 = match.ev_sahibi ? "DEL'SOLE" : match.rakip.toUpperCase();
+                const team2 = match.ev_sahibi ? match.rakip.toUpperCase() : "DEL'SOLE";
+
+                const card = `
+                    <div class="fixture-card ${isNext ? 'next-match' : ''}">
+                        <div class="match-info">
+                            <div class="match-label">${isNext ? 'UPCOMING BATTLE' : 'SCHEDULED'}</div>
+                            <div class="match-teams">
+                                ${team1} <span class="vs-divider">VS</span> ${team2}
+                            </div>
+                        </div>
+                        <div class="match-time-box">
+                            <div class="match-date">${match.tarih}</div>
+                            <div class="match-hour">${match.saat} <small style="font-size:10px; color:#555;">(TR)</small></div>
+                        </div>
+                    </div>
+                `;
+                wrapper.innerHTML += card;
+            });
+        } catch (e) {
+            wrapper.innerHTML = "FIXTURE DATA NOT FOUND.";
+        }
+    }
+
+    loadFixtures();
+</script>
+
+</body>
+</html>

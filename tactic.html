@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Del'Sole Tactical Pro - Stats Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #8833ff;
+            --dark-purple: #12002f;
+            --accent-purple: #b388ff;
+            --bg-black: #0a0a0c;
+            --panel-bg: rgba(20, 20, 25, 0.95);
+            --text-white: #ffffff;
+        }
+
+        *{box-sizing:border-box; font-family: 'Inter', sans-serif;}
+        body{margin:0; height:100vh; overflow:hidden; background: var(--bg-black); color: var(--text-white);}
+
+        /* HEADER */
+        #topbar{
+            height:70px; background: var(--dark-purple);
+            display:flex; align-items:center; padding:0 30px;
+            border-bottom: 2px solid var(--primary-purple);
+            z-index: 2000; position:relative;
+        }
+        #brand-wrap{margin-right:auto; display:flex; align-items:center; gap:15px}
+        #brand-text{font-family: 'Orbitron', sans-serif; font-size:26px; font-weight:700; color: #fff; letter-spacing: 2px;}
+        #brand-logo{height:45px; order: 2;}
+
+        .tool{
+            padding:10px 20px; margin-left:12px; cursor:pointer;
+            background: transparent; border: 1px solid var(--primary-purple);
+            color: var(--text-white); border-radius:6px; font-size:13px; font-weight:600;
+            transition: all 0.3s;
+        }
+        .tool:hover{ background: var(--primary-purple); box-shadow: 0 0 15px var(--primary-purple); }
+
+        /* ANA ALAN */
+        #main{display:flex; height:calc(100vh - 70px); position:relative; z-index: 1;}
+        #fieldWrap{
+            flex:1; display:flex; justify-content:center; align-items:center; 
+            overflow:hidden; position:relative; z-index: 1;
+            background: repeating-linear-gradient(90deg, #14332a, #14332a 60px, #1a4236 60px, #1a4236 120px);
+        }
+        #field{position:relative; transform-origin:center center; z-index: 2;}
+        #field img{ width:900px; display:block; border: 4px solid #fff; pointer-events: none; }
+        canvas{position:absolute; left:0; top:0; pointer-events:none; z-index:1005}
+
+        /* OYUNCULAR (TOKEN) */
+        .token { position: absolute; text-align: center; user-select: none; cursor: grab; z-index: 1010 !important; width: 60px; }
+        .token .number {
+            width: 32px; height: 32px; background: #fff; border-radius: 50%;
+            color: var(--dark-purple); display: flex; align-items: center; justify-content: center;
+            font-weight: 800; margin: 0 auto; border: 3px solid var(--primary-purple);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 14px;
+        }
+        .token .name { font-size: 11px; color: #fff; font-weight: 700; text-shadow: 2px 2px 4px #000; margin-top: 4px; white-space: nowrap; }
+        .token.selected .number { border-color: #00ffcc; box-shadow: 0 0 20px #00ffcc; transform: scale(1.1); }
+
+        /* YAN PANEL */
+        #side{ width:320px; background: var(--panel-bg); border-left: 2px solid var(--primary-purple); display:flex; flex-direction:column; z-index: 1500; }
+        .side-header{ padding:15px; background: rgba(136, 51, 255, 0.1); text-align:center; font-family: 'Orbitron', sans-serif; color: var(--accent-purple); font-size:12px; letter-spacing:1px; }
+        #list{flex:1; overflow-y:auto; padding:15px;}
+        .playerItem{
+            background: rgba(255,255,255,0.05); padding:10px; margin-bottom:10px; border-radius:8px;
+            display:flex; flex-direction:column; align-items:flex-start; cursor:grab; border: 1px solid rgba(136, 51, 255, 0.2); transition: 0.3s;
+        }
+        .playerItem:hover{ background: rgba(136, 51, 255, 0.3); transform: translateX(5px); }
+        .pi-main { display:flex; justify-content:space-between; width:100%; align-items:center; }
+        .pi-stats { font-size: 9px; color: #aaa; margin-top: 5px; display: flex; gap: 8px; }
+
+        /* MODAL */
+        #editPanel{
+            position:absolute; right:340px; top:20px; width:280px;
+            background: #1a1a24; padding:20px; border-radius:12px; display:none;
+            z-index: 3000; border: 1px solid var(--primary-purple);
+            box-shadow: 0 10px 50px rgba(0,0,0,0.9);
+        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-box label { font-size: 10px; color: var(--accent-purple); display: block; margin-bottom: 4px; }
+        #editPanel input, #editPanel select {
+            width:100%; margin-bottom:8px; padding:8px; background: #0a0a0c;
+            color:#fff; border: 1px solid #333; border-radius:4px; font-size: 13px;
+        }
+        #editPanel button { width:100%; padding:10px; background: var(--primary-purple); border:none; color:white; font-weight:700; cursor:pointer; border-radius:6px; margin-top:5px; }
+    </style>
+</head>
+<body>
+
+<div id="topbar">
+ <div id="brand-wrap">
+  <div id="brand-text">Del`Sole</div>
+  <img id="brand-logo" src="delsole.png" alt="Logo">
+ </div>
+ <div class="tool" onclick="toggleDraw()">Çizim Modu</div>
+ <div class="tool" onclick="clearDraw()">Temizle</div>
+ <div class="tool sync-btn" onclick="fetchOnlineRoster()">↻ Verileri Güncelle</div>
+</div>
+
+<div id="main">
+ <div id="fieldWrap">
+  <div id="field">
+   <img src="saha.png">
+   <canvas id="draw" width="900" height="600"></canvas>
+  </div>
+ </div>
+
+ <div id="side">
+  <div class="side-header">KADRO & İSTATİSTİK</div>
+  <div id="list"></div>
+  <div id="benchSection" style="background: rgba(0,0,0,0.4); border-top: 1px solid var(--primary-purple);">
+    <div class="side-header" style="color:#ff5555">YEDEKLER</div>
+    <div id="benchList" style="padding:10px; max-height:180px; overflow-y:auto;"></div>
+  </div>
+ </div>
+</div>
+
+<div id="editPanel">
+    <h3 style="margin-top:0; color: var(--accent-purple); font-size: 16px; font-family: 'Orbitron';">OYUNCU PROFİLİ</h3>
+    <label style="font-size:10px;">İsim & Mevki</label>
+    <input id="eName" placeholder="İsim">
+    <select id="eMevki">
+        <option value="GK">Kaleci (GK)</option>
+        <option value="DEF">Defans (DEF)</option>
+        <option value="MID">Orta Saha (MID)</option>
+        <option value="ATT">Forvet (ATT)</option>
+    </select>
+    
+    <div class="stat-grid">
+        <div class="stat-box"><label>GOL</label><input type="number" id="eGol"></div>
+        <div class="stat-box"><label>ASİST</label><input type="number" id="eAsist"></div>
+        <div class="stat-box"><label>TACKLE</label><input type="number" id="eTackle"></div>
+        <div class="stat-box"><label>SAVE</label><input type="number" id="eSave"></div>
+    </div>
+
+    <label style="font-size:10px; margin-top:10px; display:block;">Görünüm</label>
+    <input id="eNo" placeholder="Numara">
+    <input type="color" id="eColor" value="#8833ff" style="height:40px; cursor:pointer;">
+    
+    <button onclick="applyEdit()">DEĞİŞİKLİKLERİ KAYDET</button>
+    <button id="modalBenchBtn" style="background:#ff4444;" onclick="sendToBench()">YEDEĞE ÇEK</button>
+    <button id="modalDeleteBtn" style="background:#444;" onclick="deleteFromField()">SAHADAN KALDIR</button>
+    <button style="background:transparent; color:#888; border:1px solid #333;" onclick="closeEdit()">Kapat</button>
+</div>
+
+<script>
+const JSON_URL = "https://api.npoint.io/3d476a612f6e630dfdae"; 
+let roster = [], benchedPlayers = [], fieldPlayers = [], selected = null, scale = 1, isEditingFromList = false;
+
+async function fetchOnlineRoster() {
+    try {
+        const res = await fetch(JSON_URL);
+        const data = await res.json();
+        roster = data.map(p => ({
+            n: p.n, no: p.no, mevki: p.mevki || "MID", 
+            gol: p.gol || 0, asist: p.asist || 0, 
+            tackle: p.tackle || 0, save: p.save || 0,
+            color: p.color || "#ffffff"
+        }));
+        updateListsUI();
+    } catch(e) { console.error("Veri yüklenemedi."); }
+}
+
+function updateListsUI() {
+    const listEl = document.getElementById("list");
+    const benchEl = document.getElementById("benchList");
+    listEl.innerHTML = ""; benchEl.innerHTML = "";
+
+    roster.forEach(p => {
+        let d = document.createElement("div");
+        d.className = "playerItem"; d.draggable = true;
+        d.innerHTML = `
+            <div class="pi-main">
+                <div><span style="color:var(--accent-purple)">[${p.mevki}]</span> ${p.n}</div> 
+                <strong>#${p.no}</strong>
+            </div>
+            <div class="pi-stats">
+                <span>G: ${p.gol}</span><span>A: ${p.asist}</span><span>T: ${p.tackle}</span><span>S: ${p.save}</span>
+            </div>`;
+        d.ondragstart = (e) => e.dataTransfer.setData("pData", JSON.stringify(p));
+        d.ondblclick = () => { isEditingFromList=true; selected=p; openEditModal(p); hideActionButtons(); };
+        listEl.appendChild(d);
+    });
+
+    benchedPlayers.forEach((p, i) => {
+        let d = document.createElement("div");
+        d.className = "playerItem"; d.style.borderColor = "#ff5555";
+        d.innerHTML = `
+            <div class="pi-main">
+                <div>${p.n}</div> 
+                <strong onclick="removeFromBench(${i})" style="cursor:pointer; color:#ff5555">↺</strong>
+            </div>`;
+        benchEl.appendChild(d);
+    });
+}
+
+function openEditModal(p) {
+    document.getElementById("editPanel").style.display = "block";
+    document.getElementById("eName").value = p.n;
+    document.getElementById("eNo").value = p.no;
+    document.getElementById("eMevki").value = p.mevki;
+    document.getElementById("eGol").value = p.gol;
+    document.getElementById("eAsist").value = p.asist;
+    document.getElementById("eTackle").value = p.tackle;
+    document.getElementById("eSave").value = p.save;
+    document.getElementById("eColor").value = p.color;
+}
+
+function hideActionButtons() {
+    document.getElementById("modalBenchBtn").style.display = "none";
+    document.getElementById("modalDeleteBtn").style.display = "none";
+}
+
+const fieldContainer = document.getElementById("field");
+const fieldWrap = document.getElementById("fieldWrap");
+
+fieldWrap.ondragover = e => e.preventDefault();
+fieldWrap.ondrop = e => {
+    e.preventDefault();
+    const data = JSON.parse(e.dataTransfer.getData("pData"));
+    if(fieldPlayers.some(p => p.n === data.n)) return;
+    const rect = fieldContainer.getBoundingClientRect();
+    addPlayerToField(data, (e.clientX - rect.left) / scale, (e.clientY - rect.top) / scale);
+    roster = roster.filter(p => p.n !== data.n);
+    updateListsUI();
+};
+
+function addPlayerToField(data, x, y) {
+    let t = document.createElement("div");
+    t.className = "token";
+    t.style.left = (x - 30) + "px"; t.style.top = (y - 16) + "px";
+    t.innerHTML = `<div class="number" style="background:${data.color}">${data.no}</div><div class="name">${data.n}</div>`;
+    fieldContainer.appendChild(t);
+    
+    let pObj = {...data, el:t};
+    fieldPlayers.push(pObj);
+    
+    t.onpointerdown = e => {
+        if(drawMode) return;
+        selected = pObj;
+        t.setPointerCapture(e.pointerId);
+        t.onpointermove = me => {
+            const r = fieldContainer.getBoundingClientRect();
+            t.style.left = ((me.clientX - r.left)/scale - 30) + "px";
+            t.style.top = ((me.clientY - r.top)/scale - 16) + "px";
+        };
+        t.onpointerup = () => { t.onpointermove = null; };
+    };
+
+    t.ondblclick = () => {
+        isEditingFromList = false; selected = pObj;
+        openEditModal(pObj);
+        document.getElementById("modalBenchBtn").style.display = "block";
+        document.getElementById("modalDeleteBtn").style.display = "block";
+    };
+}
+
+function applyEdit() {
+    if(!selected) return;
+    selected.n = document.getElementById("eName").value;
+    selected.no = document.getElementById("eNo").value;
+    selected.mevki = document.getElementById("eMevki").value;
+    selected.gol = document.getElementById("eGol").value;
+    selected.asist = document.getElementById("eAsist").value;
+    selected.tackle = document.getElementById("eTackle").value;
+    selected.save = document.getElementById("eSave").value;
+    selected.color = document.getElementById("eColor").value;
+    
+    if(selected.el) {
+        selected.el.querySelector(".name").textContent = selected.n;
+        selected.el.querySelector(".number").textContent = selected.no;
+        selected.el.querySelector(".number").style.background = selected.color;
+    }
+    updateListsUI(); closeEdit();
+}
+
+function sendToBench() {
+    if(!selected || isEditingFromList) return;
+    if(selected.el) selected.el.remove();
+    benchedPlayers.push({...selected, el: null});
+    fieldPlayers = fieldPlayers.filter(p => p.n !== selected.n);
+    updateListsUI(); closeEdit();
+}
+
+function deleteFromField() {
+    if(!selected || isEditingFromList) return;
+    if(selected.el) selected.el.remove();
+    roster.push({...selected, el: null});
+    fieldPlayers = fieldPlayers.filter(p => p.n !== selected.n);
+    updateListsUI(); closeEdit();
+}
+
+function removeFromBench(i) {
+    roster.push(benchedPlayers.splice(i, 1)[0]);
+    updateListsUI();
+}
+
+function closeEdit() { document.getElementById("editPanel").style.display = "none"; selected = null; }
+
+fieldWrap.onwheel = e => { e.preventDefault(); scale += e.deltaY * -0.001; scale = Math.min(Math.max(0.4, scale), 2); fieldContainer.style.transform = `scale(${scale})`; };
+const ctx = document.getElementById("draw").getContext("2d");
+let drawMode = false, drawing = false;
+function toggleDraw() { drawMode = !drawMode; document.getElementById("draw").style.pointerEvents = drawMode ? "auto" : "none"; }
+function clearDraw() { ctx.clearRect(0,0,900,600); }
+document.getElementById("draw").onpointerdown = e => { if(!drawMode) return; drawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+document.getElementById("draw").onpointermove = e => { if(!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.strokeStyle="#fff"; ctx.lineWidth=3; ctx.stroke(); };
+document.getElementById("draw").onpointerup = () => drawing=false;
+
+window.onload = fetchOnlineRoster;
+</script>
+</body>
+</html>

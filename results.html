@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Del'Sole | Victory Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030305;
+            --card-bg: #0b0c10;
+            --primary: #8833ff;
+            --win: #00ff66;
+            --lose: #ff0044;
+            --draw: #00d4ff;
+            --border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            background-image: radial-gradient(circle at 50% 0%, rgba(136, 51, 255, 0.15) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .dash-btn {
+            text-decoration: none;
+            color: #fff;
+            font-family: 'Orbitron';
+            font-size: 11px;
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            transition: 0.3s;
+            background: rgba(136, 51, 255, 0.1);
+        }
+
+        .dash-btn:hover { background: var(--primary); box-shadow: 0 0 20px var(--primary); }
+
+        h1 { font-family: 'Orbitron'; font-size: 22px; letter-spacing: 5px; margin: 0; color: #fff; }
+
+        /* MAÇ KARTI */
+        .match-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        /* DİNAMİK RENK SINIFLARI */
+        .card-win { border-left: 5px solid var(--win); }
+        .card-lose { border-left: 5px solid var(--lose); }
+        .card-draw { border-left: 5px solid var(--draw); }
+
+        .match-main {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            text-align: center;
+            gap: 15px;
+        }
+
+        .team-name { font-family: 'Orbitron'; font-size: 18px; font-weight: 800; letter-spacing: 1px; }
+
+        .score-box {
+            background: rgba(0,0,0,0.4);
+            padding: 10px 25px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .score-num { font-family: 'Orbitron'; font-size: 32px; font-weight: 900; }
+
+        /* KAZANAN PARLAMASI */
+        .winner-text { text-shadow: 0 0 15px var(--win); color: var(--win) !important; }
+        .loser-text { text-shadow: 0 0 15px var(--lose); color: var(--lose) !important; }
+        .draw-text { text-shadow: 0 0 15px var(--draw); color: var(--draw) !important; }
+
+        /* ANALİZ ALANI */
+        .analysis-text {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            font-size: 15px;
+            color: #aaa;
+            line-height: 1.5;
+            border-top: 1px solid var(--border);
+        }
+
+        .match-footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-family: 'Orbitron';
+            color: #444;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="main.html" class="dash-btn">← DASHBOARD</a>
+        <h1>RESULTS</h1>
+        <div style="width: 50px;"></div>
+    </header>
+
+    <div id="resultsWrapper"></div>
+</div>
+
+<script>
+    const API_URL = "https://api.npoint.io/38986283ca9226d5a198";
+
+    async function loadData() {
+        const wrapper = document.getElementById('resultsWrapper');
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            wrapper.innerHTML = "";
+
+            data.reverse().forEach(match => {
+                // Skor Ayıklama (Örn: "4-2")
+                const scores = match.skor.split('-').map(s => parseInt(s.trim()));
+                const soleScore = scores[0];
+                const oppScore = scores[1];
+
+                let soleClass = "";
+                let oppClass = "";
+                let cardClass = "";
+                let scoreColor = "";
+
+                if (soleScore > oppScore) {
+                    soleClass = "winner-text";
+                    cardClass = "card-win";
+                    scoreColor = "var(--win)";
+                } else if (soleScore < oppScore) {
+                    oppClass = "loser-text";
+                    cardClass = "card-lose";
+                    scoreColor = "var(--lose)";
+                } else {
+                    soleClass = "draw-text";
+                    oppClass = "draw-text";
+                    cardClass = "card-draw";
+                    scoreColor = "var(--draw)";
+                }
+
+                wrapper.innerHTML += `
+                    <div class="match-card ${cardClass}">
+                        <div class="match-main">
+                            <div class="team-name ${soleClass}">DEL'SOLE</div>
+                            <div class="score-box" style="border-color: ${scoreColor}">
+                                <div class="score-num" style="color: ${scoreColor}">${match.skor}</div>
+                            </div>
+                            <div class="team-name ${oppClass}">${match.rakip.toUpperCase()}</div>
+                        </div>
+
+                        <div class="analysis-text">
+                            ${match.not || 'Maç analizi sisteme girilmedi.'}
+                        </div>
+                        
+                        <div class="match-footer">
+                            <span>TIMESTAMP: ${match.tarih}</span>
+                            <span>STATUS: FINALIZED</span>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            wrapper.innerHTML = "VERİTABANI HATASI.";
+        }
+    }
+
+    loadData();
+</script>
+
+</body>
+</html>
