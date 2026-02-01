@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Del'Sole | Elite Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-purple: #8833ff;
+            --neon-cyan: #00ffcc;
+            --deep-bg: #050508;
+            --glass-bg: rgba(20, 20, 30, 0.7);
+        }
+
+        body {
+            margin: 0;
+            background: var(--deep-bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(136, 51, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.05) 0%, transparent 40%);
+        }
+
+        /* HEADER & LOGO AREA */
+        header {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            padding: 0 60px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
+            border-bottom: 1px solid rgba(136, 51, 255, 0.2);
+            backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .brand-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, #8833ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .logo-img {
+            height: 55px;
+            width: auto;
+            filter: drop-shadow(0 0 10px var(--neon-purple));
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--neon-purple)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 15px var(--neon-purple)); }
+        }
+
+        nav { display: flex; gap: 10px; align-items: center; }
+
+        .nav-link {
+            text-decoration: none;
+            color: #ccc;
+            font-family: 'Orbitron';
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-link:hover {
+            background: rgba(136, 51, 255, 0.2);
+            color: #fff;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(136, 51, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Aktif veya Vurgulu Link */
+        .nav-link.highlight {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        /* HERO / LIVE PREVIEW */
+        .hero {
+            padding: 60px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero-main {
+            background: linear-gradient(45deg, var(--glass-bg), rgba(136, 51, 255, 0.05));
+            border-radius: 30px;
+            padding: 50px;
+            border-left: 5px solid var(--neon-purple);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .hero-main h1 {
+            font-family: 'Orbitron';
+            font-size: 56px;
+            margin: 0;
+            line-height: 1.1;
+            font-weight: 900;
+        }
+
+        .hero-main p {
+            color: #999;
+            font-size: 18px;
+            margin: 25px 0 35px;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        /* DYNAMIC LEADERBOARD AREA */
+        .side-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stat-bar {
+            background: var(--glass-bg);
+            padding: 22px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .stat-bar:hover { 
+            border-color: var(--neon-cyan); 
+            background: rgba(0, 255, 204, 0.08);
+            transform: translateX(-10px);
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            font-family: 'Orbitron';
+            border: 1px solid var(--neon-cyan);
+            font-size: 12px;
+        }
+
+        .stat-info { flex: 1; }
+        .stat-info .label { font-size: 10px; color: #777; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .stat-info .value { font-family: 'Orbitron'; font-size: 19px; color: #fff; font-weight: 700; }
+
+        /* QUICK ACTIONS GRID */
+        .grid-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            padding: 0 60px 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .action-card {
+            background: var(--glass-bg);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: 0.4s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            background: rgba(136, 51, 255, 0.12);
+            border-color: var(--neon-purple);
+            box-shadow: 0 10px 30px rgba(136, 51, 255, 0.2);
+        }
+
+        .action-card h3 { font-family: 'Orbitron'; margin: 0 0 10px 0; color: var(--neon-purple); font-size: 18px; }
+        .action-card p { font-size: 13px; color: #888; margin: 0; line-height: 1.4; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand-container">
+        <div class="brand-text">DEL'SOLE</div>
+        <img src="delsole.png" alt="Logo" class="logo-img">
+    </div>
+    <nav>
+        <a href="index.html" class="nav-link highlight">Dashboard</a>
+        <a href="results.html" class="nav-link">Maçlar</a>
+        <a href="fixtures.html" class="nav-link">Fikstür</a>
+        <a href="tactic.html" class="nav-link">Tactic Engine</a>
+        <a href="cards.html" class="nav-link">Roster</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-main">
+        <span style="color: var(--neon-purple); font-weight: 800; letter-spacing: 6px; font-size: 12px; margin-bottom: 10px; display: block;">PRO ELITE DATA CENTER</span>
+        <h1>TACTICAL<br><span style="color: var(--neon-cyan)">OPERATIONS</span></h1>
+        <p>Takım mekaniklerini optimize edin, rakip analizlerini inceleyin ve galibiyet serisini başlatın.</p>
+        <div style="display:flex; gap: 15px;">
+            <div onclick="location.href='results.html'" style="padding: 12px 25px; background: #fff; color: #000; border-radius: 5px; font-weight: 900; font-size: 13px; cursor: pointer; font-family: 'Orbitron';">MAÇ ARŞİVİ</div>
+            <div onclick="location.href='fixtures.html'" style="padding: 12px 25px; background: rgba(255,255,255,0.1); color: #fff; border-radius: 5px; font-weight: 900; font-size: 13px; cursor: pointer; font-family: 'Orbitron'; border: 1px solid rgba(255,255,255,0.2);">SIRADAKİ MAÇ</div>
+        </div>
+    </div>
+
+    <div class="side-stats">
+        <div class="stat-bar">
+            <div class="stat-icon">GOAL</div>
+            <div class="stat-info">
+                <div class="label">Top Scorer</div>
+                <div class="value" id="topScorer">Loading...</div>
+            </div>
+        </div>
+        <div class="stat-bar">
+            <div class="stat-icon">AST</div>
+            <div class="stat-info">
+                <div class="label">Assist Leader</div>
+                <div class="value" id="topAssistant">Loading...</div>
+            </div>
+        </div>
+        <div class="stat-bar">
+            <div class="stat-icon">DEF</div>
+            <div class="stat-info">
+                <div class="label">Tackle Master</div>
+                <div class="value" id="topTackler">Loading...</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="grid-actions">
+    <div class="action-card" onclick="location.href='tactic.html'">
+        <h3>Taktik Strateji</h3>
+        <p>Saha içi dizilişleri ve oyuncu rollerini dinamik olarak yönetin.</p>
+    </div>
+    <div class="action-card" onclick="location.href='cards.html'">
+        <h3>Performans Kartları</h3>
+        <p>Tüm sezonun istatistiksel dökümünü ve oyuncu puanlarını görün.</p>
+    </div>
+    <div class="action-card" onclick="location.href='results.html'">
+        <h3>Maç Analizleri</h3>
+        <p>Geçmiş maç sonuçlarını ve alınan ekran görüntülerini inceleyin.</p>
+    </div>
+</div>
+
+<script>
+    const JSON_URL = "https://api.npoint.io/3d476a612f6e630dfdae";
+
+    async function updateDashboard() {
+        try {
+            const res = await fetch(JSON_URL);
+            const data = await res.json();
+            
+            if(data.length > 0) {
+                const scorer = data.reduce((max, p) => (parseInt(p.gol || 0) > parseInt(max.gol || 0) ? p : max), data[0]);
+                const assistant = data.reduce((max, p) => (parseInt(p.asist || 0) > parseInt(max.asist || 0) ? p : max), data[0]);
+                const tackler = data.reduce((max, p) => (parseInt(p.tackle || 0) > parseInt(max.tackle || 0) ? p : max), data[0]);
+
+                document.getElementById('topScorer').innerText = scorer.n + " (" + scorer.gol + ")";
+                document.getElementById('topAssistant').innerText = assistant.n + " (" + assistant.asist + ")";
+                document.getElementById('topTackler').innerText = tackler.n + " (" + (tackler.tackle || 0) + ")";
+            }
+        } catch(e) {
+            console.error("Dashboard veri hatası.");
+        }
+    }
+
+    updateDashboard();
+</script>
+
+</body>
+</html>
